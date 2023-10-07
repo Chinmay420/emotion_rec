@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+    <style>
+body {
+  background-color: #1c1c1c;
+  color: #f2f2f2;
+  font-family: 'Futura', sans-serif;
+}
+
+a {
+  color: #ff5c5c;
+}
+
+button {
+  background-color: #ff5c5c;
+  border: none;
+  border-radius: 20px;
+  color: #f2f2f2;
+  font-weight: bold;
+  padding: 10px 20px;
+  transition: background-color 0.2s ease;
+}
+
+button:hover {
+  background-color: #ff8c8c;
+}
+
+h1, h2, h3 {
+  font-weight: bold;
+}
+
+h1 {
+  font-size: 48px;
+  margin-bottom: 20px;
+}
+
+h2 {
+  font-size: 36px;
+  margin-bottom: 10px;
+}
+
+p {
+  font-size: 18px;
+  line-height: 1.5;
+  margin-bottom: 20px;
+}
+
+img {
+  max-width: 100%;
+}
+
+/* Example section styles */
+
+.section {
+  padding: 100px 0;
+}
+
+.section-title {
+  font-size: 24px;
+  margin-bottom: 20px;
+  text-transform: uppercase;
+}
+
+.section-text {
+  font-size: 18px;
+  line-height: 1.5;
+  margin-bottom: 40px;
+}
+
+.section-image {
+  display: block;
+  margin: 0 auto 40px;
+  max-width: 100%;
+}
+
+
+    </style>
+<head>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+	<title>Emotion Detection</title>
+	<link rel="stylesheet" href="{{ '/style.css' }}">
+</head>
+<body style="text-align:center;">
+  <h1>Emotion Detection</h1>
+    <img id="video_feed" src="{{ '/video_feed' }}" />
+      <p id="recording_message" style="display:none;">Recording...</p>
+      <div style="display:block;">
+        <form method="get" action="{{ '/download_report' }}">
+          <button type="submit">Download Report</button>
+        </form>
+    <br>
+<button onclick="startRecording()">Start Recording</button>
+<button id="stoprecording" onclick="stopRecording()" >Stop Recording</button>
+<br><br>
+<a id="downloadvideo" href="{{ '/download_video' }}" style="display:none;">Download Video</a>
+
+</div>
+<div id="plot-container">
+  <img id="plot" src="data:image/png;base64,{{ plot_url }}" />
+</div>
+<button id="refresh-btn">Refresh Graph</button>
+<script>
+  $(document).ready(function() {
+    // Attach a click handler to the refresh button
+    $('#refresh-btn').click(function() {
+      // Send an AJAX request to the server to get the updated plot image
+      $.get('/refresh_plot', function(response) {
+        // Replace the contents of the plot container with the new image
+        $('#plot-container').html(response);
+      });
+    });
+  });
+</script>
+
+
+<script>
+  var isRecording = false;
+  var videoFeed = document.getElementById('video_feed');
+  var recordingMessage = document.getElementById('recording_message');
+
+  function startRecording() {
+    fetch('/start_recording');
+    isRecording = true;
+    recordingMessage.style.display = 'block';
+  }
+
+  function stopRecording() {
+    if (isRecording) {
+      if (confirm('Are you sure you want to stop recording?')) {
+        fetch('/stop_recording');
+        isRecording = false;
+        recordingMessage.style.display = 'none';
+        downloadvideo.style.display = 'block';
+      }
+    }
+  }
+
+  videoFeed.addEventListener('loadedmetadata', function() {
+    var playbackRate = videoFeed.duration / 10; // Set playback rate to show 10 seconds of recording in actual time
+    videoFeed.playbackRate = playbackRate;
+  });
+
+</script>
+
+</body>
+</html>

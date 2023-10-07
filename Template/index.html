@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Emotion Detection</title>
+		<link href="https://fonts.googleapis.com/css?family=Montserrat:400,700" rel="stylesheet">
+		<style>
+			body {
+				font-family: 'Montserrat', sans-serif;
+				margin: 0;
+				padding: 0;
+				background-color: #f2f2f2;
+			}
+			header {
+				background-color: #263238;
+				color: #fff;
+				text-align: center;
+				padding: 20px;
+				box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+			}
+			h1 {
+				margin: 0;
+			}
+			.container {
+				display: flex;
+				flex-wrap: wrap;
+				padding: 20px;
+				margin: 0 auto;
+				max-width: 1200px;
+			}
+			.box {
+        text-align: center;
+				flex: 1 1 300px;
+				box-sizing: border-box;
+				padding: 20px;
+				background-color: #fff;
+				border-radius: 8px;
+				box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+				margin: 10px;
+				transition: all 0.2s ease-in-out;
+			}
+			.box:hover {
+				transform: translateY(-5px);
+				box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+			}
+			.box h2 {
+				margin: 0;
+				margin-bottom: 10px;
+				font-size: 24px;
+				font-weight: bold;
+				color: #263238;
+			}
+			.box p {
+				margin: 0;
+				margin-bottom: 10px;
+				color: #808080;
+			}
+			.box img {
+				max-width: 100%;
+				border-radius: 8px;
+			}
+			.form-group {
+				margin-bottom: 10px;
+			}
+			label {
+				display: block;
+				margin-bottom: 5px;
+				font-weight: bold;
+				color: #263238;
+			}
+			input[type="text"] {
+				width: 100%;
+				padding: 10px;
+				border: 1px solid #ccc;
+				border-radius: 4px;
+				box-shadow: none;
+				box-sizing: border-box;
+				font-size: 16px;
+				color: #263238;
+			}
+			button {
+				background-color: #263238;
+				color: #fff;
+				padding: 10px 20px;
+				border: none;
+				border-radius: 4px;
+				cursor: pointer;
+				font-size: 16px;
+				margin-top: 10px;
+				transition: all 0.2s ease-in-out;
+			}
+			button:hover {
+				background-color: #455a64;
+			}
+			.graph {
+				height: 300px;
+			}
+			@media screen and (max-width: 768px) {
+				.box {
+					flex: 1 1 100%;
+				}
+			}
+		</style>
+	</head>
+	<body>
+		<header>
+			<h1>Emotion Detection</h1>
+		</header>
+		<div class="container">
+			<div class="box">
+        <h2>Video Feed</h2>
+				<img id="video_feed" src="{{ '/video_feed' }}" />
+				<p id="recording_message" style="display:none;">Recording...</p>
+        <div style="display:block;">
+          <form method="get" action="{{ '/download_report' }}">
+            <button type="submit">Download Report</button>
+          </form>
+			
+				<button onclick="startRecording()">Start Recording</button>
+				<button id="stoprecording" onclick="stopRecording()">Stop Recording</button>
+				<br><br>
+				<a id="downloadvideo" href="{{ '/download_video' }}" style="display:none;">Download Video</a>
+			</div>
+      </div>
+			<div class="box">
+				<h2>Graph</h2>
+				<div id="plot-container">
+					<img id="plot" class="graph" src="data:image/png;base64,{{ plot_url }}" />
+				</div>
+				<button id="refresh-btn">Refresh Graph</button>
+			</div>
+		</div>
+	
+		<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+
+<script>
+  $(document).ready(function() {
+    // Attach a click handler to the refresh button
+    $('#refresh-btn').click(function() {
+      // Send an AJAX request to the server to get the updated plot image
+      $.get('/refresh_plot', function(response) {
+        // Replace the contents of the plot container with the new image
+        $('#plot-container').html(response);
+      });
+    });
+  });
+</script>
+
+
+<script>
+  var isRecording = false;
+  var videoFeed = document.getElementById('video_feed');
+  var recordingMessage = document.getElementById('recording_message');
+
+  function startRecording() {
+    fetch('/start_recording');
+    isRecording = true;
+    recordingMessage.style.display = 'block';
+  }
+
+  function stopRecording() {
+    if (isRecording) {
+      if (confirm('Are you sure you want to stop recording?')) {
+        fetch('/stop_recording');
+        isRecording = false;
+        recordingMessage.style.display = 'none';
+        downloadvideo.style.display = 'block';
+      }
+    }
+  }
+
+  videoFeed.addEventListener('loadedmetadata', function() {
+    var playbackRate = videoFeed.duration / 10; // Set playback rate to show 10 seconds of recording in actual time
+    videoFeed.playbackRate = playbackRate;
+  });
+
+</script>
+
+</body>
+</html>
